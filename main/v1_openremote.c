@@ -24,8 +24,11 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 #include "secret.h"
-
 #include "wifi_app.h"
+
+#include "bmp280.h"
+#include "Cap_soil_moist.h"
+#include "rgb_led.h"
 
 #define WIFI_SSID         "Raptor GN"
 #define WIFI_PASSWORD     "r4pt0rTECH"
@@ -54,32 +57,31 @@ static void mqtt_app_start(void)
     esp_mqtt_client_start(client);
 }
 
-void app_main()
+void Sensors_read_task(void)
 {
-  // Initialize nvs
-  esp_err_t ret = nvs_flash_init();
-  if( ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND )  // error check if found -> erase -> reinitialize
-  {
-    ESP_ERROR_CHECK(nvs_flash_erase());
-    ret = nvs_flash_init();   
-  }
-  ESP_ERROR_CHECK(ret);
-
-  wifi_app_start(); // starts and connects to wifi with credentials declared in wifi_app.h
-  get_rest_function();
-  mqtt_app_start();
- int msg_id;
+    int msg_id;
     bool value = true;
     char txt[11];
     int val = 1;
 
-    while (1) {
+    while(1)
+    {
         sprintf(txt, "%d", value);
         msg_id = esp_mqtt_client_publish(client, TOPIC, txt, 0, 1, 0);
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
-        sprintf(txt, "%d", val);
+        sprintf(txt, "%d",(int)sample_data().temperature);
+        ESP_LOGD(TAG,"temperature:%lf", sample_data().temperature );
+        // sprintf(txt, "%d", val);
         msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/Write_attribute/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
+        ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+
+        sprintf(txt, "%d",(int)sample_data().pressure);
+        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/pressure/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
+        ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+
+        sprintf(txt, "%d",moist_sens_val());
+        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/humidity/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
         value = !value;
@@ -90,6 +92,53 @@ void app_main()
 
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
+
+}
+
+void app_main()
+{
+  // Initialize nvs
+  esp_err_t ret = nvs_flash_init();
+  if( ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND )  // error check if found -> erase -> reinitialize
+  {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();   
+  }
+    ESP_ERROR_CHECK(ret);
+
+    rgb_led_init();
+    moist_sens_init();
+    my_i2c_setup();
+    my_bme280_init(); // if it is now working, is the wrong device address hardcoded in 3 places, read,write,global
+
+    wifi_app_start(); // starts and connects to wifi with credentials declared in wifi_app.h
+    rgb_led_setState(eRgbLed_state_allOff);
+    // get_rest_function();
+    mqtt_app_start();
+
+    xTaskCreate(Sensors_read_task, "SensorsReadTask", 4096, NULL, 10, NULL);
+    
+    
+
+    // while (1) {
+        // sprintf(txt, "%d", value);
+        // msg_id = esp_mqtt_client_publish(client, TOPIC, txt, 0, 1, 0);
+        // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+
+        // sprintf(txt, "%d",(int)sample_data().temperature);
+        // ESP_LOGD(TAG,"temperature:%lf", sample_data().temperature );
+        // // sprintf(txt, "%d", val);
+        // msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/Write_attribute/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
+        // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+
+        // value = !value;
+        // val++;
+
+        // ESP_LOGI(TAG, "value: %d", value);
+        // ESP_LOGI(TAG, "val: %d", val);
+
+        // vTaskDelay(10000 / portTICK_PERIOD_MS);
+    // }
 
 
 
