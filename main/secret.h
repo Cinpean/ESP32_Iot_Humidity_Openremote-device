@@ -1,20 +1,20 @@
 // Wifi 
-const char* ssid = "Raptor GN"; // Wifi SSID
-const char* password = "r4pt0rTECH"; // Wifi Password
+const char* ssid = "AndroidAP45 8F"; // Wifi SSID  Raptor GN
+const char* password = "00448855"; // Wifi Password  r4pt0rTECH
 
 //MQTT Broker
-const char* mqtt_server = "192.168.2.188"; //or URL of your hosted environment e.g. demo.openremote.io
+const char* mqtt_server = "192.168.55.131"; //or URL of your hosted environment e.g. demo.openremote.io
 unsigned int mqtt_port = 1883; //SSL 8883 NoneSSL 1883
-const char* username = "master:mqttuser"; // Service User Realm:Serviceuser
-const char* mqttpass = "78Z9dhK03upa3FlQLTmraS98cb1rlXZq"; // Service User Secret
-const char* ClientID = "First_test_Client"; //this can be anything you like but must be unique
+const char* username = "master:mqttuser2"; // Service User Realm:Serviceuser
+const char* mqttpass = "djfeNgOclsueI01kwvtcGTY5WWV7gh0H"; // Service User Secret
+const char* ClientID = "First_test_Client23"; //this can be anything you like but must be unique
 //LastWill
 const char* lastwill = "master/First_test_Client/writeattributevalue/AttributeName/AssetID";
 const char* lastwillmsg = "0";
 
 
 //subscribing Topic
-const char *topic = "master/First_test_Client/attribute/Subscribe_attribute/7Y8SXoNL35Tu1t0Z33Ewfu"; //see Subscribing Topics in Documentation https://github.com/openremote/openremote/wiki/User-Guide%3A-Manager-APIs#mqtt-api-mqtt-broker
+const char *topic = "master/First_test_Client2/writeattributevalue/Subscribe_attribute/5vV2VDBMDTX0ETXl28Tq0z"; //see Subscribing Topics in Documentation https://github.com/openremote/openremote/wiki/User-Guide%3A-Manager-APIs#mqtt-api-mqtt-broker
 
 
 //Local CA

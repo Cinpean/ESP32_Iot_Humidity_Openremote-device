@@ -15,8 +15,8 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 
-#define STA_SSID "Raptor GN" //"Raptor GN" TP-LINK_419A14
-#define STA_PASSWORD "r4pt0rTECH" //"r4pt0rTECH" 23927438
+#define STA_SSID "AndroidAP45 8F" //"Raptor GN" TP-LINK_419A14
+#define STA_PASSWORD "00448855" //"r4pt0rTECH" 23927438
 
 // netif object for the station
 extern esp_netif_t* esp_netif_sta;

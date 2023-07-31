@@ -16,10 +16,13 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "freertos/queue.h"
+#include "time.h"
 
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
+#include "sys/time.h"
+#include "esp_sntp.h"
 
 #include "esp_log.h"
 #include "mqtt_client.h"
@@ -32,14 +35,14 @@
 #include <string.h>
 #include "driver/ledc.h"
 
-#define WIFI_SSID         "Raptor GN"
-#define WIFI_PASSWORD     "r4pt0rTECH"
-#define MQTT_SERVER       "mqtt://192.168.2.188:1883"
+#define WIFI_SSID         "AndroidAP45 8F" //  Raptor GN
+#define WIFI_PASSWORD     "00448855"   // r4pt0rTECH
+#define MQTT_SERVER       "mqtt://192.168.55.131:1883"  // mqtt://192.168.2.188:1883
 #define MQTT_PORT         1883
-#define MQTT_USERNAME     "master:mqttuser"
-#define MQTT_PASSWORD     "78Z9dhK03upa3FlQLTmraS98cb1rlXZq"
-#define CLIENT_ID         "First_test_Client"
-#define TOPIC             "master/First_test_Client/writeattributevalue/Subscribe_attribute/7Y8SXoNL35Tu1t0Z33Ewfu"
+#define MQTT_USERNAME     "master:mqttuser2"
+#define MQTT_PASSWORD     "djfeNgOclsueI01kwvtcGTY5WWV7gh0H" //"78Z9dhK03upa3FlQLTmraS98cb1rlXZq"  //BItD8U8wRQiWX8Bc6d1PPuaTvnQx9csz  YUtirONcHQFARJ9ImvRTgG4RZwt0PtGU
+#define CLIENT_ID         "First_test_Client23"
+#define TOPIC             "master/First_test_Client23/writeattributevalue/Subscribe_attribute/5vV2VDBMDTX0ETXl28Tq0z" //7Y8SXoNL35Tu1t0Z33Ewfu
 #define attribute1        "light_led"
 #define attribute2        "pump1"
 #define attribute3        "led_color" 
@@ -66,9 +69,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     switch ((esp_mqtt_event_id_t)event_id) {
     case MQTT_EVENT_CONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client/attributevalue/light_led/7Y8SXoNL35Tu1t0Z33Ewfu", 0);
-        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client/attributevalue/pump1/7Y8SXoNL35Tu1t0Z33Ewfu", 0);
-        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client/attributevalue/led_color/7Y8SXoNL35Tu1t0Z33Ewfu", 0);
+        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client23/attributevalue/light_led/5vV2VDBMDTX0ETXl28Tq0z", 0);
+        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client23/attributevalue/pump1/5vV2VDBMDTX0ETXl28Tq0z", 0);
+        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client23/attributevalue/led_color/5vV2VDBMDTX0ETXl28Tq0z", 0);
+        msg_id = esp_mqtt_client_subscribe(client, "master/First_test_Client23/attributevalue/irig_start/5vV2VDBMDTX0ETXl28Tq0z", 0);
         ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -136,7 +140,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtt://192.168.2.188:1883",
+        .broker.address.uri = "mqtt://192.168.55.131:1883",  // mqtt://192.168.2.188:1883
         .credentials.client_id = CLIENT_ID,
         .credentials.username = MQTT_USERNAME,
         .credentials.authentication.password = MQTT_PASSWORD,
@@ -156,6 +160,11 @@ void Sensors_read_task(void)
     char txt[11];
     int val = 1;
 
+    struct tm timeinfo;
+    timeinfo.tm_hour = 14;
+    timeinfo.tm_min = 31;
+    timeinfo.tm_sec = 20;
+
     while(1)
     {
         sprintf(txt, "%d", value);
@@ -163,17 +172,18 @@ void Sensors_read_task(void)
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
         sprintf(txt, "%d",(int)sample_data().temperature);
+    
         ESP_LOGD(TAG,"temperature:%lf", sample_data().temperature );
         // sprintf(txt, "%d", val);
-        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/Write_attribute/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
+        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/temp/5vV2VDBMDTX0ETXl28Tq0z", txt, 0, 1, 0);
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
         sprintf(txt, "%d",(int)sample_data().pressure);
-        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/pressure/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
+        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pressure/5vV2VDBMDTX0ETXl28Tq0z", txt, 0, 1, 0);
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
         sprintf(txt, "%d",moist_sens_val());
-        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client/writeattributevalue/humidity/7Y8SXoNL35Tu1t0Z33Ewfu", txt, 0, 1, 0);
+        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/humidity/5vV2VDBMDTX0ETXl28Tq0z", txt, 0, 1, 0);
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
         value = !value;
@@ -182,8 +192,52 @@ void Sensors_read_task(void)
         ESP_LOGI(TAG, "value: %d", value);
         ESP_LOGI(TAG, "val: %d", val);
 
+
+        time_t now;
+        time(&now);
+        localtime_r(&now, &timeinfo);
+
+        if (timeinfo.tm_hour == 15 && timeinfo.tm_min == 31) {
+            ESP_LOGI("TRIGGER","intrerupt OCCURED");
+        }
+
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
+
+}
+void obtain_time(void)
+{
+    time_t now;
+    char strftime_buf[64];
+    struct tm timeinfo;
+
+    int retry = 0;
+    const int retry_count = 10;
+
+    sntp_servermode_dhcp(1);
+    ESP_LOGI(TAG, "Initializing SNTP");
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    sntp_setservername(0, "pool.ntp.org");
+    sntp_set_time_sync_notification_cb(sntp_set_time_sync_notification_cb);
+    
+    #ifdef CONFIG_SNTP_TIME_SYNC_METHOD_SMOOTH
+    sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
+    #endif
+    sntp_init();
+    
+    setenv("TZ", "EET-2EEST-3,M3.5.0/03:00:00,M10.5.0/04:00:00", 1);
+	tzset();
+
+    /* wait for time to be set */
+    while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
+        ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
+
+    time(&now);
+    localtime_r(&now,&timeinfo);
+    strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+    ESP_LOGI(TAG,"current date/time is: %s", strftime_buf);
 
 }
 
@@ -205,10 +259,11 @@ void app_main()
     my_bme280_init(); // if it is now working, is the wrong device address hardcoded in 3 places, read,write,global
     rgb_led_setState(eRgbLed_state_mqttActivation);
     wifi_app_start(); // starts and connects to wifi with credentials declared in wifi_app.h
-    
+
     // get_rest_function();
+    obtain_time(); // connects to internet and sets the current date and time 
+
     mqtt_app_start();
     rgb_led_setState(eRgbLed_state_allOff);
     xTaskCreate(Sensors_read_task, "SensorsReadTask", 4096, NULL, 10, NULL);
-    
 }

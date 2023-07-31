@@ -1,5 +1,13 @@
 {
     "idf.flashType": "UART",
-    "idf.portWin": "COM3",
-    "idf.adapterTargetName": "esp32"
+    "idf.portWin": "COM5",
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+        "wifi_app.h": "c",
+        "queue.h": "c",
+        "time.h": "c"
+    },
+    "idf.openOcdConfigs": [
+        "board/esp32-wrover-kit-3.3v.cfg"
+    ]
 }
