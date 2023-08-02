@@ -34,6 +34,8 @@
 #include "rgb_led.h"
 #include <string.h>
 #include "driver/ledc.h"
+#include "stdlib.h" 
+#include "store_flash.h"
 
 #define WIFI_SSID         "AndroidAP45 8F" //  Raptor GN
 #define WIFI_PASSWORD     "00448855"   // r4pt0rTECH
@@ -46,9 +48,16 @@
 #define attribute1        "light_led"
 #define attribute2        "pump1"
 #define attribute3        "led_color" 
+#define attribute4        "irig_start"
 
 static const char *TAG = "mqtt_example";
 esp_mqtt_client_handle_t client;
+long long timestamp_ms = 0;
+time_t timestamp_sec;
+struct tm timeinfo;
+struct tm current_timeinfo;
+char* endptr;
+
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -63,7 +72,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     esp_mqtt_event_handle_t event = event_data;
     esp_mqtt_client_handle_t client = event->client;
     int msg_id;
-    int hex_number0, hex_number1, hex_number2, hex_number3;
+    int hex_number1, hex_number2, hex_number3;
     char * pEnd;
     char szNumbers[9];
     switch ((esp_mqtt_event_id_t)event_id) {
@@ -88,18 +97,26 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
-        if(strncmp(event->topic + 40 ,attribute1,strlen(attribute1))==0 && event->data[0] == 't')  rgb_led_setState(eRgbLed_state_allOn);
-            else if(strncmp(event->topic + 40 ,attribute1,strlen(attribute1))==0 && event->data[0] == 'f') rgb_led_setState(eRgbLed_state_allOff);
+        if(strncmp(event->topic + 42 ,attribute1,strlen(attribute1))==0 && event->data[0] == 't')  rgb_led_setState(eRgbLed_state_allOn);
+            else if(strncmp(event->topic + 42 ,attribute1,strlen(attribute1))==0 && event->data[0] == 'f') rgb_led_setState(eRgbLed_state_allOff);
 
-        if(strncmp(event->topic + 40 ,attribute2,strlen(attribute2))==0 && event->data[0] == 't') rgb_led_setState(eRgbLed_state_pick_color);
-            else if(strncmp(event->topic + 40 ,attribute2,strlen(attribute2))==0 && event->data[0] == 'f') rgb_led_setState(eRgbLed_state_allOff);
+        if(strncmp(event->topic + 42 ,attribute2,strlen(attribute2))==0 && event->data[0] == 't') rgb_led_setState(eRgbLed_state_pick_color);
+            else if(strncmp(event->topic + 42 ,attribute2,strlen(attribute2))==0 && event->data[0] == 'f') rgb_led_setState(eRgbLed_state_allOff);
+        
+        if(strncmp(event->topic + 42 ,attribute4,strlen(attribute4))==0 ){
+            timestamp_ms = strtoll(event->data, &endptr, 10);
+            timestamp_sec = (time_t)(timestamp_ms / 1000);
+            ESP_LOGI("DATE","din Handler %lld",timestamp_ms);
+            save_time_to_nvs("current_tim",timestamp_sec); // saves to flash time set for irigaton / or else
+
+        }
 
 /**
  * Hex-to-dec converison for controlling color of the led with 8 bit color depth 
  * received data is a concatenated char that is composed by 3 8-bit hex values 
 */
 
-        if(strncmp(event->topic + 40 ,attribute3,strlen(attribute3))==0 ) { strncpy(szNumbers, event->data, sizeof(szNumbers) - 1);
+        if(strncmp(event->topic + 42 ,attribute3,strlen(attribute3))==0 ) { strncpy(szNumbers, event->data, sizeof(szNumbers) - 1);
                                                                             // printf("data of sznumbers = %.*s\r\n",sizeof(szNumbers),szNumbers);
                                                                             szNumbers[sizeof(szNumbers) - 1] = '\0';
                                                                             szNumbers[sizeof(szNumbers)] = '\0';
@@ -159,8 +176,9 @@ void Sensors_read_task(void)
     bool value = true;
     char txt[11];
     int val = 1;
+    bool done_check = 0;
 
-    struct tm timeinfo;
+    
     timeinfo.tm_hour = 14;
     timeinfo.tm_min = 31;
     timeinfo.tm_sec = 20;
@@ -195,12 +213,29 @@ void Sensors_read_task(void)
 
         time_t now;
         time(&now);
-        localtime_r(&now, &timeinfo);
+        localtime_r(&now, &current_timeinfo);
+        localtime_r(&timestamp_sec, &timeinfo);
 
-        if (timeinfo.tm_hour == 15 && timeinfo.tm_min == 31) {
-            ESP_LOGI("TRIGGER","intrerupt OCCURED");
+        
+
+        if (current_timeinfo.tm_hour == timeinfo.tm_hour && current_timeinfo.tm_min == timeinfo.tm_min && done_check == 0) {
+            ESP_LOGI("TRIGGER","intrerupt START OCCURED");
+            done_check = 1;
+            ESP_LOGI("TRIGGER","%d",timeinfo.tm_min);
+            // msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pump2/5vV2VDBMDTX0ETXl28Tq0z", 1, 0, 1, 0);
+            //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         }
 
+        if (current_timeinfo.tm_hour == timeinfo.tm_hour && current_timeinfo.tm_min == timeinfo.tm_min + 1 && done_check == 1) {
+            ESP_LOGI("TRIGGER","intrerupt END OCCURED");
+            done_check = 0;
+           // ESP_LOGI ("DATE","read from memory %d", read_time_from_nvs("current_tim",&timestamp_sec)); // reads from flash
+           // printf("%d",timeinfo.tm_min);
+           // ESP_LOGI("TRIGGER","%d",timeinfo.tm_hour);
+            // msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pump2/5vV2VDBMDTX0ETXl28Tq0z", 1, 0, 1, 0);
+            //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+        }
+        printf("%d",timeinfo.tm_min);
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
 
@@ -210,6 +245,7 @@ void obtain_time(void)
     time_t now;
     char strftime_buf[64];
     struct tm timeinfo;
+    
 
     int retry = 0;
     const int retry_count = 10;
@@ -227,15 +263,19 @@ void obtain_time(void)
     
     setenv("TZ", "EET-2EEST-3,M3.5.0/03:00:00,M10.5.0/04:00:00", 1);
 	tzset();
-
+    
     /* wait for time to be set */
     while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
         ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
         vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
-
+    
     time(&now);
     localtime_r(&now,&timeinfo);
+
+    printf("%d",timeinfo.tm_year);
+    if(timeinfo.tm_year > 70) rgbled_color(0,0,0);
+
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     ESP_LOGI(TAG,"current date/time is: %s", strftime_buf);
 
@@ -248,21 +288,28 @@ void app_main()
   esp_err_t ret = nvs_flash_init();
   if( ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND )  // error check if found -> erase -> reinitialize
   {
+    ESP_LOGI("NVS ERROR","nvs errors found -> erased memory");
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();   
   }
     ESP_ERROR_CHECK(ret);
 
+    ret = open_nvs();
+    if (ret != ESP_OK) {
+        printf("NVS open failed\n");
+        return;
+    }
+
     rgb_led_init();
     moist_sens_init();
     my_i2c_setup();
     my_bme280_init(); // if it is now working, is the wrong device address hardcoded in 3 places, read,write,global
-    rgb_led_setState(eRgbLed_state_mqttActivation);
+    rgbled_color(255,0,0);
     wifi_app_start(); // starts and connects to wifi with credentials declared in wifi_app.h
 
     // get_rest_function();
+    
     obtain_time(); // connects to internet and sets the current date and time 
-
     mqtt_app_start();
     rgb_led_setState(eRgbLed_state_allOff);
     xTaskCreate(Sensors_read_task, "SensorsReadTask", 4096, NULL, 10, NULL);

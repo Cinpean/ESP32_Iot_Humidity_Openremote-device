@@ -5,11 +5,11 @@
 
 void rgb_led_init(void)
 {
-	// gpio_pad_select_gpio(GPIO_NUM_0);
+	// gpio_pad_select_gpio(GPIO_NUM_5);
 	gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
-	// // gpio_pad_select_gpio(GPIO_NUM_2);
+	// // gpio_pad_select_gpio(GPIO_NUM_18);
     gpio_set_direction(GPIO_NUM_17, GPIO_MODE_OUTPUT);
-	// // gpio_pad_select_gpio(GPIO_NUM_4);
+	// // gpio_pad_select_gpio(GPIO_NUM_17);
     gpio_set_direction(GPIO_NUM_18, GPIO_MODE_OUTPUT);
 	gpio_set_direction(GPIO_NUM_0, GPIO_MODE_OUTPUT);
 	gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
@@ -35,7 +35,7 @@ void rgb_led_init(void)
 	ledc_channel_config_t ledc_channel_green = {
     .channel = LEDC_CHANNEL_2,
     .duty = 0,
-    .gpio_num = GPIO_NUM_17,
+    .gpio_num = GPIO_NUM_18,
     .speed_mode = LEDC_LOW_SPEED_MODE,
     .timer_sel = LEDC_TIMER_0
 	};
@@ -44,7 +44,7 @@ void rgb_led_init(void)
 	ledc_channel_config_t ledc_channel_blue = {
     .channel = LEDC_CHANNEL_4,
     .duty = 0,
-    .gpio_num = GPIO_NUM_18,
+    .gpio_num = GPIO_NUM_17,
     .speed_mode = LEDC_LOW_SPEED_MODE,
     .timer_sel = LEDC_TIMER_0
 	};
@@ -58,29 +58,29 @@ void rgb_led_setState(eRgbLed_state_t state)
 	switch(state)
 	{
 	case eRgbLed_state_init:
-	    gpio_set_level(GPIO_NUM_0, 1);
-	    gpio_set_level(GPIO_NUM_2, 0);
-	    gpio_set_level(GPIO_NUM_4, 0);
+	    gpio_set_level(GPIO_NUM_5, 1);
+	    gpio_set_level(GPIO_NUM_18, 0);
+	    gpio_set_level(GPIO_NUM_17, 0);
 		break;
 	case eRgbLed_state_wifiConnected:
-	    gpio_set_level(GPIO_NUM_0, 0);
-	    gpio_set_level(GPIO_NUM_2, 1);
-	    gpio_set_level(GPIO_NUM_4, 0);
+	    gpio_set_level(GPIO_NUM_5, 0);
+	    gpio_set_level(GPIO_NUM_18, 1);
+	    gpio_set_level(GPIO_NUM_17, 0);
 		break;
 	case eRgbLed_state_mqttActivation:
-	    gpio_set_level(GPIO_NUM_0, 0);
-	    gpio_set_level(GPIO_NUM_2, 0);
-	    gpio_set_level(GPIO_NUM_4, 1);
+	    gpio_set_level(GPIO_NUM_5, 0);
+	    gpio_set_level(GPIO_NUM_18, 0);
+	    gpio_set_level(GPIO_NUM_17, 1);
 		break;
 	case eRgbLed_state_allOn:
-	    gpio_set_level(GPIO_NUM_0, 1);
-	    gpio_set_level(GPIO_NUM_2, 1);
-	    gpio_set_level(GPIO_NUM_4, 1);
+	    gpio_set_level(GPIO_NUM_5, 1);
+	    gpio_set_level(GPIO_NUM_18, 1);
+	    gpio_set_level(GPIO_NUM_17, 1);
 		break;
 	case eRgbLed_state_allOff:
-	    gpio_set_level(GPIO_NUM_0, 0);
-	    gpio_set_level(GPIO_NUM_2, 0);
-	    gpio_set_level(GPIO_NUM_4, 0);
+	    gpio_set_level(GPIO_NUM_5, 0);
+	    gpio_set_level(GPIO_NUM_18, 0);
+	    gpio_set_level(GPIO_NUM_17, 0);
 		break;
 		
 	case eRgbLed_state_pick_color:

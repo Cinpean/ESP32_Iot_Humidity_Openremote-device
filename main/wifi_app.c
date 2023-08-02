@@ -27,6 +27,7 @@
 
 // Tag used for ESP serial console messages
 static const char *TAG = "wifi_app";
+esp_netif_t* esp_netif_ap  = NULL;
 
 //queue handle used to manipulate the main queue of events
 //static QueueHandle_t wifi_app_queue_handle;
@@ -124,6 +125,8 @@ void wifi_initial()
   esp_netif_init(); // TCP/IP init
   esp_event_loop_create_default(); //event loop
   esp_netif_create_default_wifi_sta(); //wifi station
+  // esp_netif_ap = esp_netif_create_default_wifi_ap(); // wifi acces point
+  // ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
   wifi_init_config_t wifi_initialization = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&wifi_initialization);
 }

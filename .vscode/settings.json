@@ -5,7 +5,18 @@
     "files.associations": {
         "wifi_app.h": "c",
         "queue.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "*.tcc": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "regex": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "store_flash.h": "c",
+        "secret.h": "c"
     },
     "idf.openOcdConfigs": [
         "board/esp32-wrover-kit-3.3v.cfg"
