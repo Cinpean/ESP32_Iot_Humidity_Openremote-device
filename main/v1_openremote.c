@@ -37,10 +37,12 @@
 #include "stdlib.h" 
 #include "store_flash.h"
 
-#define WIFI_SSID         "AndroidAP45 8F" //  Raptor GN
-#define WIFI_PASSWORD     "00448855"   // r4pt0rTECH
-#define MQTT_SERVER       "mqtt://192.168.55.131:1883"  // mqtt://192.168.2.188:1883
-#define MQTT_PORT         1883
+#include "string.h"
+
+// #define WIFI_SSID         "AndroidAP45 8F" //  Raptor GN
+// #define WIFI_PASSWORD     "00448855"   // r4pt0rTECH
+// #define MQTT_SERVER       "mqtt://192.168.55.131:1883"  // mqtt://192.168.2.188:1883
+// #define MQTT_PORT         1883
 #define MQTT_USERNAME     "master:mqttuser2"
 #define MQTT_PASSWORD     "djfeNgOclsueI01kwvtcGTY5WWV7gh0H" //"78Z9dhK03upa3FlQLTmraS98cb1rlXZq"  //BItD8U8wRQiWX8Bc6d1PPuaTvnQx9csz  YUtirONcHQFARJ9ImvRTgG4RZwt0PtGU
 #define CLIENT_ID         "First_test_Client23"
@@ -57,6 +59,7 @@ time_t timestamp_sec;
 struct tm timeinfo;
 struct tm current_timeinfo;
 char* endptr;
+int8_t flag_start_ap ;
 
 
 static void log_error_if_nonzero(const char *message, int error_code)
@@ -274,7 +277,16 @@ void obtain_time(void)
     localtime_r(&now,&timeinfo);
 
     printf("%d",timeinfo.tm_year);
-    if(timeinfo.tm_year > 70) rgbled_color(0,0,0);
+    if(timeinfo.tm_year > 75) {rgbled_color(0,0,0);}
+    else {
+        if(flag_start_ap == 0) 
+            {
+                flag_start_ap = 1; 
+                printf("flag start %d",flag_start_ap );
+                save_flag_to_nvs("flag",flag_start_ap);
+                esp_restart();
+            }
+        }
 
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     ESP_LOGI(TAG,"current date/time is: %s", strftime_buf);
@@ -284,6 +296,7 @@ void obtain_time(void)
 
 void app_main()
 {
+
   // Initialize nvs
   esp_err_t ret = nvs_flash_init();
   if( ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND )  // error check if found -> erase -> reinitialize
@@ -300,17 +313,46 @@ void app_main()
         return;
     }
 
+    read_flag_from_nvs("flag",&flag_start_ap);
+    
+    int8_t lungime_ssid;
+    int8_t lungime_pass;
+    char string_ssid[32];
+	char string_pass[32];
+	
+    read_flag_from_nvs("sid_len",&lungime_ssid);
+    read_flag_from_nvs("pass_len",&lungime_pass);
+    lungime_ssid++;
+    ESP_LOGI(TAG,"Lungime ssid %d", lungime_ssid);
+    ESP_LOGI(TAG,"Lungime pass %d", lungime_pass);
+    
+    read_creds_from_nvs("service_id",(char*)&string_ssid,(size_t *)&lungime_ssid  );
+	read_creds_from_nvs("pass",(char*)&string_pass,(size_t *)&lungime_pass );
+
+    ESP_LOGI("CONNECTING TO:","%s With password: %s",string_ssid,string_pass);	
+
     rgb_led_init();
     moist_sens_init();
     my_i2c_setup();
     my_bme280_init(); // if it is now working, is the wrong device address hardcoded in 3 places, read,write,global
     rgbled_color(255,0,0);
-    wifi_app_start(); // starts and connects to wifi with credentials declared in wifi_app.h
+    printf("flag start %d \n",flag_start_ap );
+    
+    if(flag_start_ap == 0) 
+    {
+        wifi_app_start(string_ssid, string_pass);   // starts and connects to wifi with credentials declared in wifi_app.h
+        obtain_time();      // connects to internet and sets the current date and time 
+        mqtt_app_start();
+        close_nvs();
+
+        xTaskCreate(Sensors_read_task, "SensorsReadTask", 4096, NULL, 10, NULL);
+    }
+    else if(flag_start_ap == 1) {wifi_app_start_ap();}
+        else if(flag_start_ap > 1) {save_flag_to_nvs("flag",1);}
+    
 
     // get_rest_function();
     
-    obtain_time(); // connects to internet and sets the current date and time 
-    mqtt_app_start();
-    rgb_led_setState(eRgbLed_state_allOff);
-    xTaskCreate(Sensors_read_task, "SensorsReadTask", 4096, NULL, 10, NULL);
+    // rgb_led_setState(eRgbLed_state_allOff);
+    
 }

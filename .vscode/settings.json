@@ -16,7 +16,19 @@
         "type_traits": "c",
         "utility": "c",
         "store_flash.h": "c",
-        "secret.h": "c"
+        "secret.h": "c",
+        "task.h": "c",
+        "esp_netif.h": "c",
+        "esp_event.h": "c",
+        "nvs_flash.h": "c",
+        "esp_system.h": "c",
+        "esp_wifi.h": "c",
+        "tasks_common.h": "c",
+        "credentials.h": "c",
+        "http_server.h": "c",
+        "esp_log.h": "c",
+        "esp_http_client.h": "c",
+        "stdio.h": "c"
     },
     "idf.openOcdConfigs": [
         "board/esp32-wrover-kit-3.3v.cfg"
