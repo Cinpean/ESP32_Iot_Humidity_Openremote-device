@@ -39,8 +39,8 @@ extern const uint8_t app_css_start[]				asm("_binary_app_css_start");
 extern const uint8_t app_css_end[]					asm("_binary_app_css_end");
 extern const uint8_t app_js_start[]					asm("_binary_app_js_start");
 extern const uint8_t app_js_end[]					asm("_binary_app_js_end");
-// extern const uint8_t favicon_ico_start[]			asm("_binary_favicon_ico_start");
-// extern const uint8_t favicon_ico_end[]				asm("_binary_favicon_ico_end");
+extern const uint8_t favicon_ico_start[]			asm("_binary_favicon_ico_start");
+extern const uint8_t favicon_ico_end[]				asm("_binary_favicon_ico_end");
 
 /**
  * HTTP server monitor task used to track events of the HTTP server
@@ -158,15 +158,15 @@ static esp_err_t http_server_app_js_handler(httpd_req_t *req)
  * @param req HTTP request for which the uri needs to be handled.
  * @return ESP_OK
  */
-// static esp_err_t http_server_favicon_ico_handler(httpd_req_t *req)
-// {
-// 	ESP_LOGI(TAG, "favicon.ico requested");
+static esp_err_t http_server_favicon_ico_handler(httpd_req_t *req)
+{
+	ESP_LOGI(TAG, "favicon.ico requested");
 
-// 	httpd_resp_set_type(req, "image/x-icon");
-// 	httpd_resp_send(req, (const char *)favicon_ico_start, favicon_ico_end - favicon_ico_start);
+	httpd_resp_set_type(req, "image/x-icon");
+	httpd_resp_send(req, (const char *)favicon_ico_start, favicon_ico_end - favicon_ico_start);
 
-// 	return ESP_OK;
-// }
+	return ESP_OK;
+}
 
 /**
  * wificonnect.json handler invoked after button pressed and handles receiving the ssid and pwd enterd by user
@@ -351,13 +351,13 @@ static httpd_handle_t http_server_configure(void)
 		
 
 		// register favicon.ico handler
-		// httpd_uri_t favicon_ico = {
-		// 		.uri = "/favicon.ico",
-		// 		.method = HTTP_GET,
-		// 		.handler = http_server_favicon_ico_handler,
-		// 		.user_ctx = NULL
-		// };
-		// httpd_register_uri_handler(http_server_handle, &favicon_ico);
+		httpd_uri_t favicon_ico = {
+				.uri = "/favicon.ico",
+				.method = HTTP_GET,
+				.handler = http_server_favicon_ico_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &favicon_ico);
 
 		// register wifiConnect.json handler
 		httpd_uri_t wifi_connect_json = {

@@ -238,7 +238,7 @@ void wifi_configur_sta(char *STATION_SSID, char *STATION_PASS)
   esp_wifi_set_mode(WIFI_MODE_STA);
   
   ESP_ERROR_CHECK(esp_wifi_start());
-
+	
   connection_status_return(esp_wifi_connect());
   // wifi_ap_record_t ap_info;
   // printf("%s \n",ap_info.ssid);

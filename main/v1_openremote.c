@@ -347,7 +347,7 @@ void app_main()
 
         xTaskCreate(Sensors_read_task, "SensorsReadTask", 4096, NULL, 10, NULL);
     }
-    else if(flag_start_ap == 1) {wifi_app_start_ap();}
+    else if(flag_start_ap == 1) { rgbled_color(255,127,63); wifi_app_start_ap();}
         else if(flag_start_ap > 1) {save_flag_to_nvs("flag",1);}
     
 
