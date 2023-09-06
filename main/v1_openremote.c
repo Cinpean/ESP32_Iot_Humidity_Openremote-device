@@ -107,11 +107,12 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             else if(strncmp(event->topic + 42 ,attribute2,strlen(attribute2))==0 && event->data[0] == 'f') rgb_led_setState(eRgbLed_state_allOff);
         
         if(strncmp(event->topic + 42 ,attribute4,strlen(attribute4))==0 ){
+            open_nvs();
             timestamp_ms = strtoll(event->data, &endptr, 10);
             timestamp_sec = (time_t)(timestamp_ms / 1000);
             ESP_LOGI("DATE","din Handler %lld",timestamp_ms);
             save_time_to_nvs("current_tim",timestamp_sec); // saves to flash time set for irigaton / or else
-
+            close_nvs();
         }
 
 /**
@@ -160,7 +161,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtt://192.168.55.131:1883",  // mqtt://192.168.2.188:1883
+        .broker.address.uri = "mqtt://192.168.2.188:1883",  // mqtt://192.168.2.188:1883
         .credentials.client_id = CLIENT_ID,
         .credentials.username = MQTT_USERNAME,
         .credentials.authentication.password = MQTT_PASSWORD,
@@ -207,6 +208,10 @@ void Sensors_read_task(void)
         msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/humidity/5vV2VDBMDTX0ETXl28Tq0z", txt, 0, 1, 0);
         ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
+        ESP_LOGI(TAG,"BATTERY PROCENTAGE: %d",battery_procentage()); // battery procentage %
+        sprintf(txt, "%d",battery_procentage());
+        msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/Battery/5vV2VDBMDTX0ETXl28Tq0z", txt, 0, 1, 0);
+
         value = !value;
         val++;
 
@@ -225,7 +230,7 @@ void Sensors_read_task(void)
             ESP_LOGI("TRIGGER","intrerupt START OCCURED");
             done_check = 1;
             ESP_LOGI("TRIGGER","%d",timeinfo.tm_min);
-            // msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pump2/5vV2VDBMDTX0ETXl28Tq0z", 1, 0, 1, 0);
+            //  msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pump2/5vV2VDBMDTX0ETXl28Tq0z", 1, 0, 1, 0);
             //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         }
 
@@ -235,7 +240,7 @@ void Sensors_read_task(void)
            // ESP_LOGI ("DATE","read from memory %d", read_time_from_nvs("current_tim",&timestamp_sec)); // reads from flash
            // printf("%d",timeinfo.tm_min);
            // ESP_LOGI("TRIGGER","%d",timeinfo.tm_hour);
-            // msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pump2/5vV2VDBMDTX0ETXl28Tq0z", 1, 0, 1, 0);
+            //  msg_id = esp_mqtt_client_publish(client, "master/First_test_Client23/writeattributevalue/pump2/5vV2VDBMDTX0ETXl28Tq0z", 0, 0, 1, 0);
             //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
         }
         printf("%d",timeinfo.tm_min);

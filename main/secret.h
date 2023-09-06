@@ -3,7 +3,7 @@ const char* ssid = "AndroidAP45 8F"; // Wifi SSID  Raptor GN
 const char* password = "00448855"; // Wifi Password  r4pt0rTECH
 
 //MQTT Broker
-const char* mqtt_server = "192.168.55.131"; //or URL of your hosted environment e.g. demo.openremote.io
+const char* mqtt_server = "192.168.2.188"; //or URL of your hosted environment e.g. demo.openremote.io
 unsigned int mqtt_port = 1883; //SSL 8883 NoneSSL 1883
 const char* username = "master:mqttuser2"; // Service User Realm:Serviceuser
 const char* mqttpass = "djfeNgOclsueI01kwvtcGTY5WWV7gh0H"; // Service User Secret

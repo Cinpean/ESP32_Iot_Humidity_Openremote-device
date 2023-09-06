@@ -111,7 +111,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "192.168.55.131", // 192.168.2.188
+        .broker.address.uri = "192.168.2.188", // 192.168.2.188
     };
 #if CONFIG_BROKER_URL_FROM_STDIN
     char line[128];

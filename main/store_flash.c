@@ -39,6 +39,7 @@ esp_err_t save_time_to_nvs(const char* key, time_t value) {
     }
     if (ret != ESP_OK) {
            printf("Failed to save time to NVS\n");
+           printf("eroarea: %d", ret);
        }
     else printf("done save time to NVS\n");
     // close_nvs();

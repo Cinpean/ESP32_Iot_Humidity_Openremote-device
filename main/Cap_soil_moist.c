@@ -11,6 +11,7 @@
 #include "stdio.h"
 #include "esp_system.h"
 #include "esp_adc_cal.h"
+#include "esp_log.h"
 static esp_adc_cal_characteristics_t adc1_chars;
 int16_t new_avg = 1;
 
@@ -38,11 +39,13 @@ int battery_procentage(void){
     
     int adc_val = 0;
     adc_val = adc1_get_raw(ADC1_CHANNEL_0);
-    int16_t voltage = esp_adc_cal_raw_to_voltage(adc_val, &adc1_chars)*3; //*3 becuase using a 3:1 voltage divider
-    new_avg = (0.3 * voltage) + ((1 - 0.3) * new_avg); // Exponential moving average
-    uint8_t battery_percentage = (uint8_t)(((new_avg - 3500)*100)/750); // calculating voltage to %
-    // TY_LOGD  (" battery voltage %d", voltage);
+    uint16_t voltage = (esp_adc_cal_raw_to_voltage(adc_val, &adc1_chars)*4)+120; //*4 becuase using a 4:1 voltage divider
+    // new_avg = (0.3 * voltage) + ((1 - 0.3) * new_avg); // Exponential moving average
+    uint8_t battery_percentage = (uint8_t)(((voltage - 3760)*100)/300); // calculating voltage to %
+    // ESP_LOGD("CAP_SOIL_MOIST"," battery voltage %d", voltage);
     // TY_LOGD (" new battery average %d",new_avg);
+    // ESP_LOGI("CAP_SOIL","battery volt: %u",voltage);
+    // ESP_LOGI("CAP_SOIL","adcVAL: %d",adc_val);
     return battery_percentage;
     
 }
