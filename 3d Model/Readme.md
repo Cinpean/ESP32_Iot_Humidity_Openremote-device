@@ -1,0 +1,1 @@
+Housing consisting of 2 parts front side & back 

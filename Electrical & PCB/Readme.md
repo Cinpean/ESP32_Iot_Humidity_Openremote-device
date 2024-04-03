@@ -1,0 +1,1 @@
+Electrical diagram and PCB layout were made on Eagle, and the full 3d rendering on Fusion 360
