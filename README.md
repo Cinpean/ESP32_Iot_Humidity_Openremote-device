@@ -1,8 +1,8 @@
 
 # IoT Environmental Monitoring Device
 
-![Device Housing](Assets/PCB1.png)
-![PCB](images/pcb.jpg)
+![Device Housing](Assets/case1.png)
+![PCB](Assets/PCB1.png)
 
 ## Overview
 
